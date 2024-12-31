@@ -1,0 +1,325 @@
+#Special Feature 1: AI Voice Assistant!
+
+#  Importing ai voice generator:
+import pyttsx3
+from collections import Counter
+import random
+
+#  Initialize the pyttsx3 engine:
+engine = pyttsx3.init()
+
+#  Set the voice gender to male/female: 
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[1].id)  # Typically, index 1 is a female voice while index 0 is for male.
+
+#  Adjust the voice speed and volume: 
+engine.setProperty('rate', 190)  # Speed (words per minute)
+engine.setProperty('volume', 0.8)  # Volume (0.0 lowest to 1.0 loudest)
+
+#Speak function for the AI voice!
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+
+#  Make stock system for the sushi!
+sushi_stock = {
+    "01" : {"Name" : "California Roll", "AED" : 5, "Stock" : 2},
+    "02" : {"Name" : "Vegetable Roll", "AED" : 5, "Stock" : 5},
+    "03" : {"Name" : "Salmon  Nigiri", "AED" : 8, "Stock" : 8},
+    "04" : {"Name" : "Spicy Tuna Roll", "AED" : 9, "Stock" : 6},
+    "05" : {"Name" : "Unagi Sushi Roll", "AED" : 7, "Stock" : 7},
+    "06" : {"Name" : "Philadelphia Roll", "AED" : 5, "Stock" : 5},
+    "07" : {"Name" : "Rainbow Roll", "AED" : 7, "Stock" : 7},
+    "08" : {"Name" : "Inarizushi Roll", "AED" : 9, "Stock" : 4},
+    "09" : {"Name" : "Tako Roll", "AED" : 9, "Stock" : 5},
+    "10" : {"Name" : "Temaki Roll", "AED" : 9, "Stock" : 8}
+}
+
+#  For add-ons -
+add_ons = {
+    "A01" : {"Name" :"Wasabi Paste", "AED" : 2, "Stock" : 5},
+    "A02" : {"Name": "Green Beans", "AED" : 3, "Stock" :2},
+    "A03" : {"Name" : "Soy Sauce ", "AED" : 2, "Stock" : 15},
+    "A04" : {"Name" : "Fried Tempura", "AED" : 5, "Stock" : 5},
+    "A05" : {"Name" : "Fried Gyoza", "AED" : 5, "Stock" : 3},
+    "A06" : {"Name" : "Pickled Ginger", "AED" : 2, "Stock": 7},
+    "A07" : {"Name" : "Kani Salad", "AED" : 4, "Stock" : 6},
+    "A08" : {"Name" : "Onigiri", "AED" : 5, "Stock" : 3}
+}
+
+#  Special Feature 2 - Mystery Box Random Special Drinks:
+special_drinks = {
+    "D01" : "A classic sparkling drink made with blueberries and mint: Blue Lagoon🫐🍋‍🟩!",
+    "D02" : "A sparkling summer drink made with fresh watermelon with a touch of coconut and mint for freshness: Whimsical Watermelon🍉🥥!",
+    "D03" : "A refreshing drink made with creamy citrus, cherry, and a hint of vanilla flavor: Velvet Sunset🍒🌇!",
+    "D04" : "A sparkling drink that contains fresh mint and lemonade: Minted Melody🍋🍸!",
+    "D05" : "A sour summer drink that has a mix of fresh lemonade, strawberry, blueberry, and black berries: Berry Bliss🍹🍓!",
+    "D06" : "A classic, sugary sweet drink with boba pearls: Milk tea🧋!"
+}
+
+
+#  Print welcome message + make a function to display the menu:
+def menu_display():
+    print("\nWelcome to Seasavory Vending Machine🤗!")
+    speak("Welcome to Seasavory Vending Machine!")       #  AI voice will speak as we run the program.
+    speak("We sell freshly made, ready to eat sushi! My name is Marina and I am your Virtual Assistant in this vending machine.")
+
+    print() #to give space while running the code.
+    print("🍣 Take A Look At Our Menu!: ")
+    speak("Take a look at our menu.")
+    print(f"Item ID\t -  Item Name  \t\t\t\t\tItem Price\t\t\tItem Stock")
+    print("--------------------------------------------------------------------------")
+    for key, value in sushi_stock.items():
+        print(f"\t{key}\t - \t{value['Name']:<25} \tPrice: {value['AED']} AED \t\tStock: {value['Stock']}")
+    print("--------------------------------------------------------------------------")
+# Call the menu_display function to display.
+menu_display()
+
+
+#  Make the user cart function which contains: Tupper size, user's selected inputs, with the total current bills.
+def user_cart():
+    tupper = []
+    total_cost = 0
+
+    #  Allow the user to choose tupper size: 
+    speak("Please select your tupper size before proceeding to select your desired flavors.")
+    while True:
+        try:
+            container_size = int(input("\nChoose your tupper size (3, 6, 9, 12 pieces): "))
+            if container_size in [3, 6, 9, 12]:
+                speak(f"You have selected a tupper for {container_size} pieces of sushi. You may now select your"
+                      f"desired flavors.")
+                print(f"You have selected a tupper for {container_size} pieces of sushi.")
+                break
+            else:
+                speak(f"Invalid choice. Please only select on the following: 3, 6, 9, or 12.")
+                print("❌ Invalid choice. Please only select 3, 6, 9, or 12.")
+        except ValueError:
+            speak("Invalid Input. Please enter a number.")
+            print("❌ Invalid input. Please enter a number.")
+
+
+    #  After the tupper size is chosen, the user can now select their flavors.
+    while len(tupper) < container_size:
+        speak("Enter the Item ID")
+        user_choice = input("Enter Item ID: ").casefold()
+
+        # To check if the item is in stock
+        sushi_key = user_choice.upper()
+        if sushi_key in sushi_stock:
+            if sushi_stock[sushi_key]['Stock'] > 0:
+                tupper.append(sushi_stock[sushi_key]['Name'])   #   moves the selected item id to the tupper.
+                total_cost += sushi_stock[sushi_key]['AED']     #   adds the additional costs from the stock system.
+                sushi_stock[sushi_key]['Stock'] -= 1            #   removes an item from stock system.
+
+                speak(f"{sushi_stock[sushi_key]['Name']} added to your tupperware! Great Choice")
+                print(f"\nAdded {sushi_stock[sushi_key]['Name']} to your Tupperware!")
+            else:
+                speak("We apologize! That item is now unfortunately out of stock.")         #   If item is out of stock.
+                print("We apologize😞!, that item is now unfortunately out of stock.")
+        else:
+            speak("Invalid Item ID, Please try again.")                             #   If user inputs invalid item id.
+            print("❌ Invalid Item Number, Try Again.")
+
+    # Tell user their current items within the tupper
+    print("🍱 Your current tupper contains:", tupper)
+    speak(f"Your current tupper contains the following items:{tupper}")
+    return tupper, total_cost
+
+
+#  For the additional items (Smart Suggestion):
+#  A function to display the add-on menu:
+def add_ons_suggestions():
+    print()
+    print("\n🍥 Here we have our additional items that will make your sushi tastier!")
+    speak("Here we have our additional add-ons that will make your sushi tastier.")
+    print(f"Item ID  -  Item Name  \t\t\t\t\tItem Price\t\t\tItem Stock")
+    print("--------------------------------------------------------------------------")
+    for key, value in add_ons.items():
+        print(f"{key}\t\t - \t{value['Name']:<25} \tPrice: {value['AED']} AED \t\tStock: {value['Stock']}")
+    print("--------------------------------------------------------------------------")
+
+
+# Additional Cart Function for the add-ons:
+def add_on_cart():
+    cart = []
+    additional_cost = 0
+
+    add_ons_suggestions()
+    speak("Would you like to buy additional items?")
+
+    # Loop until valid input for "yes" or "no"
+    while True:
+        user_add_choice = input("(Yes or No) Would you like to buy additional items?: ").strip().lower()
+        if user_add_choice in ['yes', 'no']:
+            break
+        else:
+            speak("Invalid input. Please only type 'Yes' or 'No'.")
+            print("❌ Invalid input. Please type 'Yes' or 'No'.")
+
+    if user_add_choice == 'yes':
+        # Allow the user to choose container size
+        while True:
+            try:
+                speak("You may now choose your container size for add-ons.")
+                add_on_container_size = int(input("\nChoose your container size (2, 4, 6 pieces): "))
+                if add_on_container_size in [2, 4, 6]:
+                    print(f"You have selected an extra container for {add_on_container_size} pieces of add-ons.")
+                    speak(f"You have selected an extra container for {add_on_container_size} pieces of add-ons.")
+                    break
+                else:
+                    speak("Invalid choice. Please select only in the following: 2, 4, or 6.")
+                    print("❌ Invalid choice. Please only select 2, 4, or 6.")
+            except ValueError:
+                speak("Invalid input. Please enter a number.")
+                print("❌ Invalid input. Please enter a number.")
+
+
+        while len(cart) < add_on_container_size:
+            speak("Enter Add-on item ID")
+            user_additional_cost = input("\nEnter Add-on Item ID: ").strip().upper()
+
+            # To check if the item is in stock:
+            if user_additional_cost in add_ons:
+                if add_ons[user_additional_cost]['Stock'] > 0:
+                    cart.append(add_ons[user_additional_cost]['Name'])
+                    additional_cost += add_ons[user_additional_cost]['AED']
+                    add_ons[user_additional_cost]['Stock'] -= 1
+
+                    speak(f"The additional item, {add_ons[user_additional_cost]['Name']}, has been added to your additional cart.")
+                    print(f"\nThe additional item, {add_ons[user_additional_cost]['Name']}, has been added to your additional cart!")
+                else:
+                    speak("We apologize, that item is unfortunately out of stock.")
+                    print("We apologize😞!, that item is unfortunately out of stock.")
+            else:
+                speak("Invalid item ID, please try again.")
+                print("❌ Invalid Item ID, Try again.")
+    elif user_add_choice == 'no':
+        speak("You have selected the 'no' option. No additional items have been added to your cart.")
+        print("No additional items have been added to your cart.")
+
+    return cart, additional_cost
+
+
+# Displaying the cart + the total added cost
+tupper, total_cost = user_cart()
+cart, additional_cost = add_on_cart()
+
+final_cost = total_cost + additional_cost   #     Math to calculate the total cost
+
+
+# A function that displays the user's current purchase.
+def current_purchase():
+    speak("Your current purchase are the following:")
+    print("\nYour Current Purchase are the following: ")
+    print("🍱 Your Tupperware contains:", tupper)
+    print(f"🧺 Additional Cart contains:", cart)
+    speak(f"the total cost is {final_cost} AED")
+    print(f"🧾 Total Cost: {final_cost} AED")
+current_purchase()
+
+#  A function for user's money and receipt
+def receipt():
+    speak("Please enter your money to pay.")
+    user_change = 0
+    while True:
+        try:
+            user_money = int(input("Please enter your money: "))
+            if user_money < final_cost:
+                speak("Your money has been dispensed. Enter sufficient amount.")
+                print(f"✖️ Your money has been dispensed. Please enter sufficient amount.")
+            elif user_money == final_cost:
+                speak("You have paid exact amount of money, no change needed.")
+                print("✔️ You have paid your bill! No change needed😊.")
+                break
+            else:
+                user_change = user_money - final_cost
+                print(f"✔️ Your change is: {user_change} AED")
+                speak(f"your change is {user_change} AED.")
+                break
+        except ValueError:
+            speak("Invalid input. Enter a valid number.")
+            print("❌ Invalid input. Enter a valid number.")
+
+
+    from collections import Counter     #   To count how many times the item has been selected.
+
+    #   A function if the user chooses to print the receipt:
+    def display_receipt():
+        #   Count occurrences of items in tupper and cart
+        tupper_counter = Counter(tupper)
+        cart_counter = Counter(cart)
+
+        print("\n" + "-" * 74)                              #    For displaying purposes:  a straight line.
+        print(f"{'SEASAVORY VENDING MACHINE 🍱🥢':^74}")   #    :74 is for spacing
+        print(f"{'----- RECEIPT -----':^74}")
+        print("-" * 74)
+
+        print("🍱 Items Purchased:")
+        for item, count in tupper_counter.items():
+            print(f"  {item:<65} x{count:>2}")
+
+        print("\n🧺 Additional Items:")
+        for item, count in cart_counter.items():
+            print(f"  {item:<65} x{count:>2}")
+
+        print("-" * 74)
+        print(f"{'💵Your Inputted Cash:':<30} {user_money:>35} AED")
+        print(f"{'🧾Total Cost:':<30} {final_cost:>35} AED")
+        print(f"{'🪙Total Change:':<30} {user_change:>35} AED")
+        print("-" * 74)
+
+
+    # Ask if the user wants a printed receipt
+    while True:
+        speak("Would you like to print your receipt or go eco-friendly?")
+        eco_choice = input("\nWould you like to print your receipt or go eco-friendly? (Type 'Print' or 'Eco'): ").strip().lower()
+        if eco_choice == "print":
+            display_receipt()    #    Call out the display_receipt function to display the receipt.
+            print("\n🧾Your receipt has now been printed!")
+            speak("Your receipt has now been printed.")
+            break
+        elif eco_choice == "eco":
+            print("\n♻️You chose to go eco-friendly! Your receipt will not be printed.")
+            speak("Thank you for choosing to go eco-friendly. Your receipt will not be printed.")
+            break
+        else:
+            speak("Invalid input. Please type 'Print' or 'Eco' only.")
+            print("❌ Invalid input. Please type 'Print' or 'Eco'.")
+
+# Call the receipt function
+receipt()
+
+
+import random   #   Chooses random item from the dictionary
+
+#For special feature 2: Mystery Box + ending/goodbye message
+random_drink = random.choice(list(special_drinks.values()))
+
+if final_cost % 2 == 0:
+    print("\n🎁 You have received a mystery box!")
+    speak("You have received a mysterious mystery box! Would you like to take it or leave it? ")
+    user_choice = input("Would you take it (T) or leave (L) it? ").casefold()   #   Ask if they want to take it or leave it.
+
+    if user_choice == 'T'.casefold():
+        print(f"The mystery box contains a special drink! {random_drink}")
+        speak("You took the mystery box!")
+        speak(f"The mystery box contains a special drink! {random_drink}!")
+
+        print("\nThank you for using the Seasavory Vending Machine! Have a nice day!🤗❣️") # Goodbye message!
+        speak(f"Thank you for using the Seasavory Vending Machine! Have a nice day!"
+              f"The Seasavory machine will always serve you a freshly made sushi anytime you want!"
+              f"Please come again soon!")
+
+    else:
+        speak(f"You chose to leave the mystery box!"
+              f"Thank you for using the Seasavory Vending Machine! Have a pleasant day!"
+              f"Please do come again soon!")
+        print("Thank you for using the Seasavory Vending Machine! Have a nice day!🤗❣️")
+
+else:
+    print("Thank you for using the Seasavory Vending Machine! Have a nice day!🤗❣️")
+    speak(f"Thank you for using the Seasavory Vending machine, have a nice day!"
+          f"The Seasavory machine will always serve you a freshly made sushi anytime you want!"
+          f"Please do come again soon!")
